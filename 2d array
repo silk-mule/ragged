@@ -1,0 +1,47 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int rows, cols;
+
+    // Input the number of rows and columns
+    cout << "Enter number of rows: ";
+    cin >> rows;
+
+    cout << "Enter number of columns: ";
+    cin >> cols;
+
+    // Step 1: Allocate memory for rows (array of pointers)
+    int** array = new int*[rows];
+
+    // Step 2: Allocate memory for columns in each row
+    for (int i = 0; i < rows; ++i) {
+        array[i] = new int[cols];
+    }
+
+    // Input values into the array
+    cout << "Enter elements of the array:\n";
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            cout << "Element [" << i << "][" << j << "]: ";
+            cin >> array[i][j];
+        }
+    }
+
+    // Display the array
+    cout << "\nThe 2D array is:\n";
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            cout << array[i][j] << "\t";
+        }
+        cout << endl;
+    }
+
+    // Free allocated memory
+    for (int i = 0; i < rows; ++i) {
+        delete[] array[i];
+    }
+    delete[] array;
+
+    return 0;
+}
