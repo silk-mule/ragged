@@ -1,0 +1,96 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+
+using namespace std;
+
+// ANSI color codes
+const string RED = "\033[31m";
+const string GREEN = "\033[32m";
+const string YELLOW = "\033[33m";
+const string BLUE = "\033[34m";
+const string MAGENTA = "\033[35m";
+const string CYAN = "\033[36m";
+const string RESET = "\033[0m";
+const string BLINK = "\033[5m";
+const string BOLD = "\033[1m";
+
+void blinkf(const string& message, const string& color, int blinkCount = 3) {//passed by refreance for efficiency
+    string blinkOn = color + BLINK + BOLD;
+    string blinkOff = RESET;//used to reset the color and blink effect 
+    
+    for(int i = 0; i < blinkCount; i++) {
+        cout << blinkOn << message << blinkOff;
+        cout.flush();//to show the message immediately without waiting for 300 milliseconds
+        this_thread::sleep_for(300ms);// Sleep for 300 milliseconds means hold it
+        cout << "\r" << string(message.length(), ' ') << "\r";
+        cout.flush();
+        this_thread::sleep_for(300ms);
+    }
+    cout << blinkOn << message << RESET << endl;
+}
+
+int main() {
+    srand(time(NULL));
+    int wins = 0, losses = 0, draws = 0;
+    
+    while(true) {
+        cout << CYAN << "\n=== ROCK PAPER SCISSORS ===" << RESET << endl;
+        cout << "Wins: " << GREEN << wins << RESET << " | Losses: " 
+             << RED << losses << RESET << " | Draws: " << YELLOW << draws << RESET << "\n\n";
+        cout << BOLD << "1. Rock\n2. Paper\n3. Scissors\n0. Quit\n" << RESET;
+        cout << "Enter your choice: ";
+
+        int player;
+        cin >> player;
+
+        // Handle quit
+        if(player == 0) {
+            cout << MAGENTA << "\nFinal Score - Wins: " << wins << ", Losses: " << losses << ", Draws: " << draws << RESET << endl;
+            cout << BLUE << "Thanks for playing!\n" << RESET;
+            break;
+        }
+
+        // Validate input
+        if(player < 1 || player > 3) {
+            cout << RED << "Invalid choice! Please try again.\n" << RESET;
+            continue;
+        }
+
+        // Computer choice
+        int computer = rand() % 3 + 1;
+        string choices[] = {"", "ROCK", "PAPER", "SCISSORS"};
+        
+        // Display choices
+        cout << "\nYou chose: " << GREEN << choices[player] << RESET << endl;
+        cout << "Computer chose: " << RED << choices[computer] << RESET << endl;
+
+        // Determine winner with colorful blinking effect
+        if(player == computer) {
+            blinkf(">> It's a draw! <<", YELLOW);
+            draws++;
+        }
+        else if((player == 1 && computer == 3) || 
+                (player == 2 && computer == 1) || 
+                (player == 3 && computer == 2)) {
+            blinkf(">> YOU WIN! <<", GREEN);
+            wins++;
+        }
+        else {
+            blinkf(">> You lose! <<", RED);
+            losses++;
+        }
+
+        // Colorful countdown
+        cout << "\nNext round starting in: ";
+        string countdownColors[] = {RED, YELLOW, GREEN};
+        for(int i = 3; i > 0; i--) {
+            cout << countdownColors[i-1] << i << RESET << ".. ";
+            this_thread::sleep_for(1s);
+        }
+        cout << BOLD << BLUE << "GO!" << RESET << "\n";
+    }
+
+    return 0;
+}
