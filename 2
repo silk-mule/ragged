@@ -1,0 +1,181 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <vector>
+#include <fstream>
+#include <limits>
+
+using namespace std;
+
+// ANSI color codes
+const string RED = "\033[31m";
+const string GREEN = "\033[32m";
+const string YELLOW = "\033[33m";
+const string BLUE = "\033[34m";
+const string MAGENTA = "\033[35m";
+const string CYAN = "\033[36m";
+const string RESET = "\033[0m";
+const string BLINK = "\033[5m";
+const string BOLD = "\033[1m";
+
+// Function to blink a message
+void blinkf(const string& message, const string& color, int blinkCount = 3) {
+    string blinkOn = color + BLINK + BOLD;
+    string blinkOff = RESET;
+    for (int i = 0; i < blinkCount; i++) {
+        cout << blinkOn << message << blinkOff;
+        cout.flush();
+        this_thread::sleep_for(300ms);
+        cout << "\r" << string(message.length(), ' ') << "\r";
+        cout.flush();
+        this_thread::sleep_for(300ms);
+    }
+    cout << blinkOn << message << RESET << endl;
+}
+
+// ASCII Art (More Realistic Version)
+void displayAscii(int choice) {
+    if (choice == 1) {
+        // Rock (represented by a round stone-like structure)
+        cout << YELLOW << R"(
+      _______
+    /       \
+   /         \
+  |  O     O  |
+  |    ___    |
+   \         /
+    \_______/
+     (ROCK)
+)" << RESET;
+    } else if (choice == 2) {
+        // Paper (represented by a rectangular sheet)
+        cout << GREEN << R"(
+     ___________
+    |           |
+    |  PAPER    |
+    |           |
+    |___________|
+     (PAPER)
+)" << RESET;
+    } else if (choice == 3) {
+        // Scissors (represented by blades and handles)
+        cout << RED << R"(
+      \    /    
+       \  /     
+       ( )      
+      /  \     
+     /____\    
+    (SCISSORS)
+)" << RESET;
+    }
+}
+
+
+// Save high score to file
+void saveHighScore(int wins) {
+    ofstream file("highscore.txt", ios::app);
+    if (file.is_open()) {
+        file << "Wins: " << wins << endl;
+        file.close();
+    }
+}
+
+// Display last 5 game results
+void displayHistory(const vector<string>& history) {
+    cout << MAGENTA << "\n--- Last Rounds ---\n" << RESET;
+    int start = history.size() > 5 ? history.size() - 5 : 0;
+    for (size_t i = start; i < history.size(); ++i) {
+        cout << history[i] << endl;
+    }
+}
+
+int main() {
+    srand(time(NULL));
+    int wins = 0, losses = 0, draws = 0;
+    vector<string> history;
+    bool playing = true;
+
+    while (playing) {
+        while (true) {
+            cout << CYAN << "\n=== ROCK PAPER SCISSORS ===" << RESET << endl;
+            cout << "Wins: " << GREEN << wins << RESET << " | Losses: "
+                << RED << losses << RESET << " | Draws: " << YELLOW << draws << RESET << "\n\n";
+            cout << BOLD << "1. Rock\n2. Paper\n3. Scissors\n0. Quit\n" << RESET;
+            cout << "Enter your choice: ";
+
+            int player;
+            if (!(cin >> player)) {
+                cout << RED << "Invalid input! Enter a number.\n" << RESET;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                continue;
+            }
+
+            if (player == 0) {
+                cout << MAGENTA << "\nFinal Score - Wins: " << wins << ", Losses: " << losses << ", Draws: " << draws << RESET << endl;
+                saveHighScore(wins);
+                displayHistory(history);
+
+                cout << YELLOW << "\nPress R to restart or Q to quit: " << RESET;
+                char choice;
+                cin >> choice;
+                if (choice == 'R' || choice == 'r') {
+                    wins = losses = draws = 0;
+                    history.clear();
+                    continue;
+                } else {
+                    cout << BLUE << "Thanks for playing!\n" << RESET;
+                    playing = false;
+                    break;
+                }
+            }
+
+            if (player < 1 || player > 3) {
+                cout << RED << "Invalid choice! Please try again.\n" << RESET;
+                continue;
+            }
+
+            int computer = rand() % 3 + 1;
+            string choices[] = { "", "ROCK", "PAPER", "SCISSORS" };
+
+            // Show choices with art
+            cout << "\nYou chose: " << GREEN << choices[player] << RESET << endl;
+            displayAscii(player);
+
+            cout << "Computer chose: " << RED << choices[computer] << RESET << endl;
+            displayAscii(computer);
+
+            // Result evaluation
+            string result;
+            if (player == computer) {
+                blinkf(">> It's a draw! <<", YELLOW);
+                draws++;
+                result = "Draw";
+            } else if ((player == 1 && computer == 3) ||
+                (player == 2 && computer == 1) ||
+                (player == 3 && computer == 2)) {
+                blinkf(">> YOU WIN! <<", GREEN);
+                wins++;
+                result = "Win";
+            } else {
+                blinkf(">> You lose! <<", RED);
+                losses++;
+                result = "Loss";
+            }
+
+            history.push_back("You: " + choices[player] + ", Computer: " + choices[computer] + " => " + result);
+
+            // Countdown
+            cout << "\nNext round starting in: ";
+            string countdownColors[] = { RED, YELLOW, GREEN };
+            for (int i = 3; i > 0; i--) {
+                cout << countdownColors[i - 1] << i << RESET << ".. ";
+                this_thread::sleep_for(1s);
+            }
+            cout << BOLD << BLUE << "GO!" << RESET << "\n";
+        }
+    }
+
+    return 0;
+}
